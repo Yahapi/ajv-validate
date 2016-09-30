@@ -82,7 +82,7 @@ export function validateQuery(schemaName, data, throwError = true) {
  * Throws a validation error by default unless `throwError` is `false`.
  */
 export function validateBody(schemaName, data, throwError = true) {
-  return validate(ajvBody, schemaName, data, false);
+  const errors = validate(ajvBody, schemaName, data, false);
   if (throwError && errors) throw new ValidationErrors(errors);
   return errors;
 }
