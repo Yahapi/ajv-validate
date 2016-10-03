@@ -1,6 +1,6 @@
 {
   "name": "@yahapi/ajv-validate",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Basic wrapper for AJV (Another JSON Schema Validator)",
   "main": "dist/index.js",
   "author": "Niels Krijger <niels@kryger.nl>",
