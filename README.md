@@ -96,7 +96,9 @@ const schema = {
   },
 };
 addQuerySchema(schema, 'testQuery');
-validateQuery('testQuery', { sort: '-a, -b' });
+validateQuery('testQuery', { sort: '+a,-b,c' }); // This is valid
+validateQuery('testQuery', { sort: '+b' }); // This is invalid
+validateQuery('testQuery', { sort: '+a,-a' }); // This is invalid
 ```
 
 ## Error format
