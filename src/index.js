@@ -21,6 +21,47 @@ const ajvQuery = new Ajv(Object.assign({}, defaultOptions, {
   coerceTypes: true,
 }));
 
+// Sort options is designed to validate a `?sort=a,-b,+c` query parameter
+ajvQuery.addKeyword('sortOptions', {
+  type: 'string',
+  errors: true,
+  metaSchema: {
+    type: 'array',
+    uniqueItems: true,
+  },
+  validate: function validation(sortOptions, data) {
+    // Prefix `+` for each sort option that has no modifier specified
+    const values = data.split(',').map((sort) => {
+      if (!sort.startsWith('+') && !sort.startsWith('-')) {
+        return `+${sort}`;
+      }
+      return sort;
+    });
+
+    // Check if all specified sort options are allowed
+    for (const sort of values) {
+      if (!sortOptions.includes(sort) && !sortOptions.includes(sort.substring(1))) {
+        validation.errors = [{
+          keyword: 'sort_options',
+          message: 'Sort option is not supported',
+        }];
+        return false;
+      }
+    }
+
+    // Check if there are any duplicate sorts that might conflict with each other
+    const unique = _.uniqBy(values, (e) => e.substring(1));
+    if (unique.length < values.length) {
+      validation.errors = [{
+        keyword: 'sort_options',
+        message: 'Cannot specify sort option more than once',
+      }];
+      return false;
+    }
+    return true;
+  },
+});
+
 /**
  * Formats errors.
  */

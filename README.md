@@ -1,6 +1,6 @@
 # ajv-validate
 
-A basic wrapper for [AJV](https://github.com/epoberezkin/ajv).
+A wrapper for [AJV](https://github.com/epoberezkin/ajv) designed to validate request bodies and query parameters.
 
 # Install
 
@@ -13,7 +13,7 @@ $ npm install --save @yahapi/ajv-validate
 This library manages two AJV validation instances, one for validating a request body and one for validating query parameters. The difference between them are:
 
 - The *body validator* returns [JSON pointers](https://tools.ietf.org/html/rfc6901) in error paths to indicate which property failed, e.g. `/name`. The *query validator* prefixes error paths with a question mark, e.g. `?name`.
-- The *query validator* will attempt to convert properties to their expected types, the *body validator* doesn't.
+- The *query validator* will attempt to convert properties to their expected types, the *body validator* does not.
 
 ## addBodySchema(schema, schemaName)
 
@@ -58,7 +58,7 @@ const schema = {
     limit: { type: 'integer', minimum: 0 },
   },
 };
-validator.addQuerySchema(schema, 'testBody');
+addQuerySchema(schema, 'testBody');
 ```
 
 ## validateQuery(schemaName, body, throwError = true)
@@ -74,9 +74,30 @@ const errors = validateQuery('testBody', { limit: -1 }, false);
 console.log(errors);
 ```
 
-## Additional formats
+## Formats
 
 - **date-time**: the standard `date-time` format is replaced by a `moment(...).isValid()` check which accepts any IS0-8601 string.
+
+## Keywords
+
+### sortOptions
+
+In the case you want to specify sort options in an url like this `?sort=a,-b` you can use the schema keyword `sortOptions`.
+
+Example:
+```js
+const schema = {
+  type: 'object',
+  properties: {
+    sort: {
+      type: 'string',
+      sortOptions: ['a', '-b', '+c'],
+    },
+  },
+};
+addQuerySchema(schema, 'testQuery');
+validateQuery('testQuery', { sort: '-a, -b' });
+```
 
 ## Error format
 
