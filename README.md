@@ -82,9 +82,8 @@ console.log(errors);
 
 ### sortOptions
 
-In the case you want to specify sort options in an url like this `?sort=a,-b` you can use the schema keyword `sortOptions`.
+When you specify sort order in an url like this `?sort=a,-b` you can use the schema keyword `sortOptions` to validate which sorts are allowed. Example:
 
-Example:
 ```js
 const schema = {
   type: 'object',
