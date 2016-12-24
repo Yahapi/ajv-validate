@@ -76,6 +76,10 @@ queryValidator.addSchema(schema);
 
 Alias for [AJV](https://github.com/epoberezkin/ajv) `addKeyword()`.
 
+## addFormat()
+
+Alias for [AJV](https://github.com/epoberezkin/ajv) `addFormat()`.
+
 ## validate(schemaName, body, [throwError = true])
 
 Validates a message body against specified schema. A schema is referenced by its id or keyword.
