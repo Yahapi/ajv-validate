@@ -13,117 +13,112 @@ const defaultOptions = {
   },
 };
 
-// ajvBody does not transform types
-const ajvBody = new Ajv(defaultOptions);
-
-// ajvQuery does attempt to transform types
-const ajvQuery = new Ajv(Object.assign({}, defaultOptions, {
-  coerceTypes: true,
-}));
-
-// Sort options is designed to validate a `?sort=a,-b,+c` query parameter
-ajvQuery.addKeyword('sortOptions', {
-  type: 'string',
-  errors: true,
-  metaSchema: {
-    type: 'array',
-    uniqueItems: true,
-  },
-  validate: function validation(sortOptions, data) {
-    // Prefix `+` for each sort option that has no modifier specified
-    const values = data.split(',').map((sort) => {
-      if (!sort.startsWith('+') && !sort.startsWith('-')) {
-        return `+${sort}`;
-      }
-      return sort;
-    });
-
-    // Check if all specified sort options are allowed
-    for (const sort of values) {
-      if (!sortOptions.includes(sort) && !sortOptions.includes(sort.substring(1))) {
-        validation.errors = [{
-          keyword: 'sort_options',
-          message: 'Sort option is not supported',
-        }];
-        return false;
-      }
-    }
-
-    // Check if there are any duplicate sorts that might conflict with each other
-    const unique = _.uniqBy(values, (e) => e.substring(1));
-    if (unique.length < values.length) {
-      validation.errors = [{
-        keyword: 'sort_options',
-        message: 'Cannot specify sort option more than once',
-      }];
-      return false;
-    }
-    return true;
-  },
-});
-
 /**
- * Formats errors.
+ * Validator class.
  */
-function formatErrors(errors, isQuery = false) {
-  return _.map(errors, (error) => {
-    let path = error.dataPath;
-    if (isQuery && path.length > 0) path = '?' + path.substr(1);
-    return {
-      code: _.snakeCase(error.keyword),
-      path,
-      message: error.message,
-    };
-  })
-}
-
-/**
- * Adds AJV validation schema to validate a query parameters.
- */
-export function addQuerySchema(schema, schemaName) {
-  ajvQuery.addSchema(schema, schemaName);
-}
-
-/**
- * Adds AJV validation schema to validate a request body.
- */
-export function addBodySchema(schema, schemaName) {
-  ajvBody.addSchema(schema, schemaName);
-}
-
-/**
- * Validates a schema.
- */
-function validate(validator, schemaName, data, isQuery = false) {
-  const valid = validator.validate(schemaName, data);
-  if (!valid) {
-    return formatErrors(validator.errors, isQuery);
+export default class Validator {
+  constructor(options = {}) {
+    this.errorFormat = options.errorFormat || 'dataPath';
+    this.ajv = new Ajv(Object.assign({}, defaultOptions, options));
+    this._initSortOptions();
   }
-  return null;
-}
 
-/**
- * Validates a request query against a JSON Schema.
- *
- * Validating a request query attempts to coerce types. Modifies original data.
- *
- * Throws a validation error by default unless `throwError` is `false`.
- */
-export function validateQuery(schemaName, data, throwError = true) {
-  const errors = validate(ajvQuery, schemaName, data, true);
-  if (throwError && errors) throw new ValidationErrors(errors);
-  return errors;
-}
+  validate(schemaName, data, throwError = true) {
+    const errors = this._ajvValidate(schemaName, data, false);
+    if (throwError && errors) throw new ValidationErrors(errors);
+    return errors;
+  }
+
+  addSchema(...args) {
+    this.ajv.addSchema(...args);
+  }
+
+  addKeyword(...args) {
+    this.ajv.addKeyword(...args);
+  }
+
+  _ajvValidate(schemaName, data) {
+    const valid = this.ajv.validate(schemaName, data);
+    if (!valid) {
+      return this._formatErrors(this.ajv.errors);
+    }
+    return null;
+  }
+
+  _formatErrors(errors) {
+    return errors.map((error) => {
+      let path = error.dataPath;
+      if (this.errorFormat === 'queryPath' && path.length > 0) {
+        path = '?' + path.substr(1);
+      }
+
+      return {
+        code: _.snakeCase(error.keyword),
+        path,
+        message: error.message,
+      };
+    });
+  }
+
+  /**
+   * Sort options is designed to validate a `?sort=a,-b,+c` query parameter.
+   */
+  _initSortOptions() {
+    this.ajv.addKeyword('sortOptions', {
+      type: 'string',
+      errors: true,
+      metaSchema: {
+        type: 'array',
+        uniqueItems: true,
+      },
+      validate: function validation(sortOptions, data) {
+        // Prefix `+` for each sort option that has no modifier specified
+        const values = data.split(',').map((sort) => {
+          if (!sort.startsWith('+') && !sort.startsWith('-')) {
+            return `+${sort}`;
+          }
+          return sort;
+        });
+
+        // Check if all specified sort options are allowed
+        for (const sort of values) {
+          if (!sortOptions.includes(sort) && !sortOptions.includes(sort.substring(1))) {
+            validation.errors = [{
+              keyword: 'sort_options',
+              message: 'Sort option is not supported',
+            }];
+            return false;
+          }
+        }
+
+        // Check if there are any duplicate sorts that might conflict with each other
+        const unique = _.uniqBy(values, (e) => e.substring(1));
+        if (unique.length < values.length) {
+          validation.errors = [{
+            keyword: 'sort_options',
+            message: 'Cannot specify sort option more than once',
+          }];
+          return false;
+        }
+        return true;
+      },
+    });
+  }
+};
 
 /**
  * Validates an object against a JSON Schema.
  *
  * Validating a request body does not attempt to coerce types.
- *
- * Throws a validation error by default unless `throwError` is `false`.
  */
-export function validateBody(schemaName, data, throwError = true) {
-  const errors = validate(ajvBody, schemaName, data, false);
-  if (throwError && errors) throw new ValidationErrors(errors);
-  return errors;
-}
+export const bodyValidator =  new Validator();
+
+/**
+ * Validates a request query against a JSON Schema.
+ *
+ * Validating a request query attempts to coerce types. Modifies original data.
+ */
+export const queryValidator = new Validator({
+  coerceTypes: true,
+  errorFormat: 'queryPath',
+});
