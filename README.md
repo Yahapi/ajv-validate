@@ -61,9 +61,9 @@ const schema = {
 addQuerySchema(schema, 'testBody');
 ```
 
-## validateQuery(schemaName, body, throwError = true)
+## validateQuery(schemaName, query, throwError = true)
 
-Validates a message body against specified schema. A schema is referenced by its name.
+Validates a querystring object against specified schema. A schema is referenced by its name.
 
 Throws a [ValidationErrors](https://github.com/yahapi/errors) with error by default. To not throw an error but return the validation errors instead set `throwError` to `false`.
 
