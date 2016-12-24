@@ -43,15 +43,15 @@ console.log(bodyValidator.validate('bodySchema', body, throwError));
 
 This library manages two AJV validation instances, one for validating a request body and one for validating query parameters. The difference between them are:
 
-                 | `bodyValidator` | `queryValidator`
------------------|-----------------|-----------------------
-`coerceTypes`    | `false`         | `true`
-`pointerType`    | `jsonPointer`   | `queryPath`
+                 | bodyValidator | queryValidator
+-----------------|---------------|-----------------------
+**coerceTypes**  | false         | true
+**pointerType**  | jsonPointer   | queryPath
 
 *Explanation options*
 
-- `coerceTypes`: automatically attempt to convert properties to their expected types.
-- `pointerType`: defines `path` format. Either `jsonPointer` as formatted by the [JSON Pointer spec](https://tools.ietf.org/html/rfc6901) or `queryPath` which prefixed error paths with a question mark, e.g. `?name`. Default is `jsonPointer`.
+- **coerceTypes**: automatically attempt to convert properties to their expected types.
+- **pointerType**: defines `path` format. Either `jsonPointer` as formatted by the [JSON Pointer spec](https://tools.ietf.org/html/rfc6901) or `queryPath` which prefixed error paths with a question mark, e.g. `?name`. Default is `jsonPointer`.
 
 ## bodyValidator.validate(schema, schemaName)
 
