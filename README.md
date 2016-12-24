@@ -118,7 +118,7 @@ message  | Human-readable error message.
 
 The following formats overwrite or are in addition to those specified in AJV:
 
-- **date-time**: the standard `date-time` format is replaced by a `moment(...).isValid()` check which accepts any IS0-8601 string.
+- **date-time**: the standard `date-time` format is replaced by a `moment(...).isValid()` which accepts any IS0-8601 string.
 
 # Keywords
 
