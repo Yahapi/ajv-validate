@@ -43,6 +43,10 @@ export default class Validator {
     this.ajv.addKeyword(...args);
   }
 
+  addFormat(...args) {
+    this.ajv.addFormat(...args);
+  }
+
   _ajvValidate(schemaName, data) {
     const valid = this.ajv.validate(schemaName, data);
     if (!valid) {
