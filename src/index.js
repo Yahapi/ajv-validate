@@ -74,7 +74,7 @@ export default class Validator {
    * Sort options is designed to validate a `?sort=a,-b,+c` query parameter.
    */
   _initSortOptions() {
-    this.ajv.addKeyword('sortOptions', {
+    this.addKeyword('sortOptions', {
       type: 'string',
       errors: true,
       metaSchema: {
