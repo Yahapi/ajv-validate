@@ -83,9 +83,18 @@ Validates a message body against specified schema. A schema is referenced by its
 Throws a [ValidationErrors](https://github.com/yahapi/errors) by default. To simply return the validation errors set `throwError` to `false`.
 
 ```js
-import { validateBody } from '@yahapi/ajv-validate';
+import { bodyValidator } from '@yahapi/ajv-validate';
 
-const errors = validateBody('testBody', { name: 'test' }, false);
+const schema = {
+  id: 'testBody',
+  type: 'object',
+  properties: {
+    limit: { type: 'integer', minimum: 0 },
+  },
+};
+bodyValidator.addSchema(schema);
+
+const errors = bodyValidator.validate('testBody', { name: 'test' }, false);
 console.log(errors);
 ```
 
