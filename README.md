@@ -53,22 +53,28 @@ This library manages two AJV validation instances, one for validating a request 
 - **coerceTypes**: automatically attempt to convert properties to their expected types.
 - **pointerType**: defines `path` format. Either `jsonPointer` as formatted by the [JSON Pointer spec](https://tools.ietf.org/html/rfc6901) or `queryPath` which prefixed error paths with a question mark, e.g. `?name`. Default is `jsonPointer`.
 
-## bodyValidator.validate(schema, schemaName)
+## addSchema()
 
-Registers a JSON schema to validate the message body.
+Alias for [AJV](https://github.com/epoberezkin/ajv) `addSchema()`.
+
+Registers a JSON schema to validate.
 
 ```js
-import { addBodySchema } from '@yahapi/ajv-validate';
+import { queryValidator } from '@yahapi/ajv-validate';
 
 const schema = {
+  id: 'testBody',
   type: 'object',
   properties: {
-    name: { type: 'string', minLength: 10 },
+    limit: { type: 'integer', minimum: 0 },
   },
 };
-addBodySchema(schema, 'testBody');
-
+queryValidator.addSchema(schema);
 ```
+
+## addKeyword()
+
+Alias for [AJV](https://github.com/epoberezkin/ajv) `addKeyword()`.
 
 ## validate(schemaName, body, [throwError = true])
 
@@ -99,36 +105,17 @@ code     | Error code formatted in snake_case.
 path     | JSON pointer or query parameter name indicating which property validation failed.
 message  | Human-readable error message.
 
-## addSchema(schema)
-
-Alias for [AJV](https://github.com/epoberezkin/ajv) `addSchema()`.
-
-Registers a JSON schema to validate.
-
-```js
-import { queryValidator } from '@yahapi/ajv-validate';
-
-const schema = {
-  id: 'testBody',
-  type: 'object',
-  properties: {
-    limit: { type: 'integer', minimum: 0 },
-  },
-};
-queryValidator.addSchema(schema);
-```
-
-## Additional formats
+# Additional formats
 
 The following formats overwrite or are in addition to those specified in AJV:
 
 - **date-time**: the standard `date-time` format is replaced by a `moment(...).isValid()` check which accepts any IS0-8601 string.
 
-## Keywords
+# Keywords
 
 The keywords listed in this section are in addition to those specified by AJV.
 
-### sortOptions
+## sortOptions
 
 When you specify sort order in an url like this `?sort=a,-b` you can use the schema keyword `sortOptions` to validate which sorts are allowed. Example:
 
