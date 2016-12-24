@@ -18,7 +18,13 @@ const defaultOptions = {
  */
 export default class Validator {
   constructor(options = {}) {
-    this.errorFormat = options.errorFormat || 'dataPath';
+    const opts = _.clone(options); // Make mutable clone
+    this.pointerType = opts.pointerType || 'jsonPointer';
+
+    if (opts.pointerType === 'queryPath') {
+      opts.pointerType = 'object';
+    }
+
     this.ajv = new Ajv(Object.assign({}, defaultOptions, options));
     this._initSortOptions();
   }
@@ -48,7 +54,7 @@ export default class Validator {
   _formatErrors(errors) {
     return errors.map((error) => {
       let path = error.dataPath;
-      if (this.errorFormat === 'queryPath' && path.length > 0) {
+      if (this.pointerType === 'queryPath' && path.length > 0) {
         path = '?' + path.substr(1);
       }
 
@@ -120,5 +126,5 @@ export const bodyValidator =  new Validator();
  */
 export const queryValidator = new Validator({
   coerceTypes: true,
-  errorFormat: 'queryPath',
+  pointerType: 'queryPath',
 });
